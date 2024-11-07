@@ -1,10 +1,9 @@
 import configparser
+"""
+Simple config parser that reads the .ini file and returns variable with the uid of defined admin
+"""
 
-# Create a ConfigParser object
 config = configparser.ConfigParser()
-
-# Read the .ini file
 config.read('config.ini')
 
-# Access values
 admin = config['admin']['uid']

@@ -1,19 +1,31 @@
 import datetime
+import os
 import time
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from config import admin
 from csv_handler import logger
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='dist')
 CORS(app)  # Enable Cross-Origin Resource Sharing
 
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path=''):
+    if path != '' and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, 'index.html')
+
 @app.route("/admin-auth", methods=["POST"])
 def adminAuth():
-    uid = request.get_json()  # Or request.form or request.data depending on how the client sends data
+    """
+    Checks if the uid of the given user matches with the admin uid
+    :return: JSON and HTTP Status
+    """
+    uid = request.get_json()
     if uid == admin:
         return jsonify({"admin":True}), 200
 
@@ -22,6 +34,10 @@ def adminAuth():
 
 @app.route("/stop-timer", methods=["POST"])
 def writeData():
+    """
+    Writes the data inside a .csv log file using the logger object from CSVLogger
+    :return: JSON and HTTP Status
+    """
     user = request.get_json().get("email")
     time = request.get_json().get("time")
     report = request.get_json().get("report")
@@ -34,6 +50,10 @@ def writeData():
 
 @app.route("/csv-user", methods=["POST"])
 def sendUserData():
+    """
+    Sends the log with all worked hours and daily reports to the user that is requesting that
+    :return: JSON and HTTP Status
+    """
     try:
         # Ensure the body is parsed as JSON
         data = request.get_json()
@@ -55,6 +75,10 @@ def sendUserData():
 
 @app.route("/csv-users",methods=["GET"])
 def sendAllUsersData():
+    """
+    Sends back the log data of all regular users to the client
+    :return: JSON and HTTP Status
+    """
     try:
         logger.refresh()
         data = logger.get_all_data()
@@ -65,4 +89,4 @@ def sendAllUsersData():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) # default host is http://127.0.0.1:5000
