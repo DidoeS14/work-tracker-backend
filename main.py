@@ -1,8 +1,14 @@
+
+"""
+Backend
+Work Time Tracker
+Version: 1.2
+"""
+
 import datetime
 import os
-import time
 
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, send_file, g
 from flask_cors import CORS
 
 from config import admin
@@ -64,8 +70,8 @@ def sendUserData():
         email = data.get("email")
 
         print(f"Received email: {email}")
-        logger.refresh()
         userData = logger.get_user_data(email)
+        print(userData)
         return jsonify({"message": "Data received successfully", "userData":userData}), 200
 
     except Exception as e:
@@ -80,7 +86,6 @@ def sendAllUsersData():
     :return: JSON and HTTP Status
     """
     try:
-        logger.refresh()
         data = logger.get_all_data()
         return jsonify({"message": "Data received successfully", "userData": data}), 200
     except Exception as e:
@@ -90,3 +95,4 @@ def sendAllUsersData():
 
 if __name__ == '__main__':
     app.run(debug=True) # default host is http://127.0.0.1:5000
+# TODO: fix error double run!

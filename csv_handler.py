@@ -1,4 +1,5 @@
 import csv
+import tempfile
 from pathlib import Path
 from datetime import datetime
 
@@ -61,19 +62,39 @@ class CSVLogger:
 
     def get_user_data(self, user_email):
         """Return a list of dictionaries for a specific user from the cached data."""
+        self.refresh()
         return [row for row in self.cached_data if row["user"] == user_email]
 
     def refresh(self):
-        """Refresh the cached data by reading the file."""
+        """
+        Refresh the cached data by reading the file. If the CSV file or its parent directory
+        does not exist, it will create both and write the appropriate headers, then cache the data.
+
+        If the file exists, it will reload the data into the cache.
+        """
         try:
-            with self.filepath.open(mode='r', newline='') as file:
-                reader = csv.DictReader(file)
-                self.cached_data = [row for row in reader]  # Refresh the cache
+            # Ensure the parent directory exists
+            if not self.filepath.parent.exists():
+                print(f"Directory {self.filepath.parent} not found. Creating it.")
+                self.filepath.parent.mkdir(parents=True, exist_ok=True)
+
+            # Check if the file exists, if not, create it with headers
+            if not self.filepath.exists():
+                print(f"CSV file {self.filepath} not found. Creating a new one with headers.")
+                self._write_headers()
+                self.cached_data = []
+            else:
+                # If the file exists, load the data into the cache
+                with self.filepath.open(mode='r', newline='') as file:
+                    reader = csv.DictReader(file)
+                    self.cached_data = [row for row in reader if row]  # Filter out any empty rows
+                print(f"Data refreshed from {self.filepath}. Total rows: {len(self.cached_data)}")
         except IOError as e:
             print(f"Error reading from CSV file: {e}")
 
     def get_all_data(self):
         """Return all data from the CSV."""
+        self.refresh()
         return self.cached_data
 
 logger = CSVLogger('data/time_and_reports.csv')
