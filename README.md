@@ -10,7 +10,7 @@ The frontend for this project can be found [here](https://github.com/DidoeS14/wo
 
 The server will generate a file data/time_and_reports.csv where all user logs for hours and reports are stored. It can be loaded in Excel or it can be used all sorts of analytics.
 
-Changelog can be found [here](changelog.txt) 
+Changelog can be found [here](changelog.txt). 
 ## Run Locally
 
 Clone the project
