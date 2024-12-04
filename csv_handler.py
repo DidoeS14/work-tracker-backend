@@ -10,6 +10,7 @@ class CSVLogger:
         self.filepath = Path(filename)  # Use Path object for the file path
         self.headers = headers or ["date", "user", "time", "report"]
         self.cached_data = []  # Cache to hold the latest data
+        self.delimiter = '|'
 
         # Ensure the directory exists
         if not self.filepath.parent.exists():
@@ -26,7 +27,7 @@ class CSVLogger:
         """Write headers to the CSV file if it doesn't already exist."""
         try:
             with self.filepath.open(mode='w', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=self.headers)
+                writer = csv.DictWriter(file, fieldnames=self.headers, delimiter=self.delimiter)
                 writer.writeheader()
         except IOError as e:
             print(f"Error initializing CSV file: {e}")
@@ -42,7 +43,7 @@ class CSVLogger:
 
         try:
             with self.filepath.open(mode='a', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=self.headers)
+                writer = csv.DictWriter(file, fieldnames=self.headers, delimiter=self.delimiter)
                 writer.writerow(data)
             # Update the cache after writing new data
             self.cached_data.append(data)
@@ -53,7 +54,7 @@ class CSVLogger:
         """Write a batch of rows to the CSV file and update cache."""
         try:
             with self.filepath.open(mode='a', newline='') as file:
-                writer = csv.DictWriter(file, fieldnames=self.headers)
+                writer = csv.DictWriter(file, fieldnames=self.headers, delimiter=self.delimiter)
                 writer.writerows(data_rows)
             # Update the cache after writing batch data
             self.cached_data.extend(data_rows)
@@ -86,7 +87,7 @@ class CSVLogger:
             else:
                 # If the file exists, load the data into the cache
                 with self.filepath.open(mode='r', newline='') as file:
-                    reader = csv.DictReader(file)
+                    reader = csv.DictReader(file, delimiter=self.delimiter)
                     self.cached_data = [row for row in reader if row]  # Filter out any empty rows
                 print(f"Data refreshed from {self.filepath}. Total rows: {len(self.cached_data)}")
         except IOError as e:

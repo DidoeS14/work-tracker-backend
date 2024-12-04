@@ -1,4 +1,9 @@
 ---------------------
+Version: 1.3
+Changes:    -changed delimiter as recommended in issue #1
+
+
+---------------------
 Version: 1.2
 Changes:    -added changelog
             -added handler for case when "times_and_report.csv" gets deleted
